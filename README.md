@@ -2,4 +2,4 @@
 
 ## credits
 
-rust setup shamelessly stolen from [Christoper Biscardi](https://github.com/ChristopherBiscardi/advent-of-code)
+rust setup shamelessly stolen from [Christopher Biscardi](https://github.com/ChristopherBiscardi/advent-of-code)
