@@ -9,7 +9,7 @@ test day part:
 bench-all:
     cargo bench -q > benchmarks.txt
 bench day part:
-    cargo banch --bench {{day}}-bench {{part}} >> {{day}}.banch.txt
+    cargo bench --bench {{day}}-bench {{part}} >> {{day}}.bench.txt
 create day:
     cargo generate --path ./daily-template --name {{day}}
     just get-input {{day}}
