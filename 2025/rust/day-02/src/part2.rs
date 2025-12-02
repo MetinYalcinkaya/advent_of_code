@@ -12,7 +12,7 @@ pub fn process(input: &str) -> miette::Result<String> {
             let num_str = i.to_string();
             let len = &num_str.len();
             let mut parts: Vec<&str>;
-            for num in 1..*len / 2 + 1 {
+            for num in 1..=(*len / 2) {
                 if len % num == 0 {
                     parts = num_str
                         .as_bytes()
