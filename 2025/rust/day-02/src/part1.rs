@@ -1,30 +1,26 @@
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
-    let ranges = input.split(',').map(|r| {
-        let mut iter = r.split('-');
-        (iter.next().unwrap(), iter.next().unwrap())
-    });
-    let mut invalid_ids = 0;
-    for range in ranges {
-        let lower = range.0.trim().parse::<u64>().unwrap();
-        let upper = range.1.trim().parse::<u64>().unwrap();
-        for i in lower..upper + 1 {
-            let num_str = i.to_string();
-            let len = &num_str.len();
-            if len % 2 == 0 {
-                let mid = len / 2;
-                let first_half = &num_str[0..mid];
-                let second_half = &num_str[mid..*len];
-                // invalid num
-                if first_half == second_half {
-                    invalid_ids += i;
-                }
-            } else {
-                continue;
-            }
-        }
-    }
-    Ok(invalid_ids.to_string())
+    let result = input
+        .split(',')
+        .map(|r| {
+            let (lower, upper) = r.split_once('-').unwrap();
+            let lower: u64 = lower.trim().parse().unwrap();
+            let upper: u64 = upper.trim().parse().unwrap();
+            (lower..=upper)
+                .filter(|&num| {
+                    let num_str = num.to_string();
+                    if num_str.len() % 2 != 0 {
+                        return false;
+                    }
+                    let mid = num_str.len() / 2;
+                    let (left, right) = num_str.split_at(mid);
+                    left == right
+                })
+                .sum::<u64>()
+        })
+        .sum::<u64>()
+        .to_string();
+    Ok(result)
 }
 
 #[cfg(test)]

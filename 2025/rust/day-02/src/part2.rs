@@ -1,33 +1,42 @@
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
-    let ranges = input.split(',').map(|r| {
-        let mut iter = r.split('-');
-        (iter.next().unwrap(), iter.next().unwrap())
-    });
-    let mut invalid_ids = 0;
-    for range in ranges {
-        let lower = range.0.trim().parse::<u64>().unwrap();
-        let upper = range.1.trim().parse::<u64>().unwrap();
-        for i in lower..upper + 1 {
-            let num_str = i.to_string();
-            let len = &num_str.len();
-            let mut parts: Vec<&str>;
-            for num in 1..=(*len / 2) {
-                if len % num == 0 {
-                    parts = num_str
-                        .as_bytes()
-                        .chunks(num)
-                        .filter_map(|s| std::str::from_utf8(s).ok())
-                        .collect();
-                    if parts.iter().all(|e| e == &parts[0]) {
-                        invalid_ids += i;
-                        break;
+    let result = input
+        .split(',')
+        .map(|r| {
+            let (lower, upper) = r.split_once('-').unwrap();
+            let lower: u64 = lower.trim().parse().unwrap();
+            let upper: u64 = upper.trim().parse().unwrap();
+            (lower..=upper)
+                .filter(|&num| {
+                    let num_str = num.to_string();
+                    let len = num_str.len();
+
+                    for block_len in 1..=(len / 2) {
+                        if len % block_len != 0 {
+                            continue;
+                        }
+
+                        let block = &num_str[..block_len];
+                        let mut valid = true;
+
+                        for i in (block_len..len).step_by(block_len) {
+                            if &num_str[i..i + block_len] != block {
+                                valid = false;
+                                break;
+                            }
+                        }
+
+                        if valid {
+                            return true;
+                        }
                     }
-                }
-            }
-        }
-    }
-    Ok(invalid_ids.to_string())
+                    false
+                })
+                .sum::<u64>()
+        })
+        .sum::<u64>()
+        .to_string();
+    Ok(result)
 }
 
 #[cfg(test)]
