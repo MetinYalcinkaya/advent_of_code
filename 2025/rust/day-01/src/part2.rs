@@ -1,57 +1,23 @@
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
-    let dirs: Vec<(&str, i32)> = input
-        .lines()
-        .map(|s| {
-            let iter = s.split_at(1);
-            let (first, second) = (iter.0, iter.1.parse::<i32>().unwrap());
-            (first, second)
-        })
-        .collect();
-    let mut dial = Dial { current: 50 };
-    let mut zero_count: i32 = 0;
-    dbg!(&dirs);
-
-    for (dir, num) in dirs {
-        if dir == "L" {
-            let d = dial.turn_left(num);
-            zero_count += d.0;
+    let mut zero_count = 0;
+    let mut dial = 50;
+    for dir in input.lines() {
+        let num = dir[1..].parse::<i32>().unwrap();
+        if dir.starts_with("L") {
+            zero_count += (num / 100).abs();
+            if dial != 0 && num % 100 >= dial {
+                zero_count += 1;
+            }
+            dial = (dial - num).rem_euclid(100);
         } else {
-            let d = dial.turn_right(num);
-            zero_count += d.0;
+            dial += num;
+            zero_count += dial / 100;
+            dial = dial.rem_euclid(100);
         }
     }
 
     Ok(zero_count.to_string())
-}
-
-// dial has bounds: (0, 99)
-struct Dial {
-    current: i32,
-}
-
-impl Dial {
-    fn turn_left(&mut self, num: i32) -> (i32, i32) {
-        let dial = self.current;
-        let num = dial - num;
-        let (mut d, r) = ((num / 100).abs(), num.rem_euclid(100));
-        if dial != 0 && num <= 0 {
-            d += 1;
-        }
-        self.current = r;
-        (d, r)
-    }
-
-    fn turn_right(&mut self, num: i32) -> (i32, i32) {
-        let dial = self.current;
-        let num = dial + num;
-        let (mut d, r) = ((num / 100).abs(), num.rem_euclid(100));
-        if dial != 0 && num <= 0 {
-            d += 1;
-        }
-        self.current = r;
-        (d, r)
-    }
 }
 
 #[cfg(test)]
