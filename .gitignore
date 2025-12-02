@@ -3,3 +3,4 @@ main
 input*.txt
 .envrc
 .env
+day-*.bench.txt
