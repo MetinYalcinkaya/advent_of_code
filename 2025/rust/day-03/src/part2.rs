@@ -1,31 +1,26 @@
 #[tracing::instrument]
 pub fn process(input: &str) -> miette::Result<String> {
-    let lines: Vec<&str> = input.lines().collect();
-    let mut nums: Vec<u32> = vec![];
+    let lines: Vec<&[u8]> = input.lines().map(str::as_bytes).collect();
+    let res: u64 = lines
+        .iter()
+        .map(|&b| {
+            let mut max = 0;
+            let mut start = 0;
+            (0..12).fold(0, |j, d| {
+                let end = b.len() - 12 + d + 1;
+                (max, start) = (start..end).fold((0, 0), |(max, start), i| {
+                    if b[i] > max {
+                        (b[i], i + 1)
+                    } else {
+                        (max, start)
+                    }
+                });
+                10 * j + (max - b'0') as u64
+            })
+        })
+        .sum();
 
-    for line in lines {
-        let (mut first_num, mut pos) = (0, 0);
-        let mut sec_num = 0;
-        for (index, byte) in line.bytes().enumerate() {
-            if byte > first_num && index >= pos && index != line.len() - 1 {
-                (first_num, pos) = (byte, index);
-            }
-        }
-
-        for byte in line[pos + 1..].bytes() {
-            if byte > sec_num {
-                sec_num = byte;
-            }
-        }
-
-        nums.push(
-            (format!("{}{}", first_num as char, sec_num as char))
-                .parse()
-                .unwrap(),
-        );
-    }
-    let sum: u32 = nums.iter().sum();
-    Ok(sum.to_string())
+    Ok(res.to_string())
 }
 
 #[cfg(test)]
